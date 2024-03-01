@@ -39,7 +39,7 @@ import "time"
 //     Status VARCHAR(255) DEFAULT 'Open'
 // );
 
-type PortfolioRes struct {
+type PortfolioReq struct {
 	ProjectID      int    `json:"projectID"`
 	ProjectName    string `json:"projectName"`
 	Description    string `json:"description"`
@@ -48,13 +48,13 @@ type PortfolioRes struct {
 	TagID          int    `json:"TagID"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
 }
 
-type PortfolioImagesRes struct {
+type PortfolioImagesReq struct {
 	ImageID   int    `json:"imageID"`
 	ProjectID int    `json:"projectID"` //     		 FOREIGN KEY (ProjectID) REFERENCES Portfolio(ProjectID)
 	ImageUrl  string `json:"imageUrl"`
 }
 
-type ContactFormRes struct {
+type ContactFormReq struct {
 	SubmissionID int       `json:"submissionID"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
@@ -62,7 +62,7 @@ type ContactFormRes struct {
 	Timestamp    time.Time `json:"timeStamp"`
 }
 
-type JobRes struct {
+type JobReq struct {
 	JobID        int    `json:"jobID"`
 	Title        string `json:"title"`
 	Description  string `json:"description"`
