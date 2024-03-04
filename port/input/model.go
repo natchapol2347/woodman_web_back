@@ -40,12 +40,13 @@ import "time"
 // );
 
 type PortfolioReq struct {
-	ProjectID      int    `json:"projectID"`
-	ProjectName    string `json:"projectName"`
-	Description    string `json:"description"`
-	CompletionDate string `json:"completionDate"`
-	CategoryID     int    `json:"categoryID"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-	TagID          int    `json:"TagID"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
+	ProjectID      int                  `json:"projectID"`
+	ProjectName    string               `json:"projectName"`
+	Description    string               `json:"description"`
+	CompletionDate string               `json:"completionDate"`
+	CategoryID     int                  `json:"categoryID"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
+	TagID          int                  `json:"TagID"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
+	Images         []PortfolioImagesReq `json:"images"`
 }
 
 type PortfolioImagesReq struct {
