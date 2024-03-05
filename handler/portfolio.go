@@ -12,8 +12,10 @@ type Handler struct {
 	service service.IService
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(service service.IService) *Handler {
+	return &Handler{
+		service: service,
+	}
 
 }
 func (h *Handler) GetPortfolio(ctx echo.Context) error {
