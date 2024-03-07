@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/natchapol2347/woodman_web_back/port/input"
+	"github.com/natchapol2347/woodman_web_back/port/output"
 	"github.com/natchapol2347/woodman_web_back/service"
 )
 
@@ -26,7 +28,8 @@ func (h *Handler) GetPortfolio(ctx echo.Context) error {
 
 	res, err := h.service.GetPortfolio(ctx, req)
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return ctx.JSON(http.StatusNotFound, output.ErrorResponse{Error: err.Error()})
 	}
 
 	return ctx.JSON(http.StatusOK, res)

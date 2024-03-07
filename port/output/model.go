@@ -72,3 +72,7 @@ type JobRes struct {
 	DatePosted   string `json:"datePosted"`
 	Status       string `json:"status"`
 }
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}

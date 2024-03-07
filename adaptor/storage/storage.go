@@ -29,16 +29,18 @@ func (s *Storage) GetPortfolio(ctx echo.Context, projectID int) (*output.Portfol
 	err := s.db.QueryRowContext(queryCtx, "SELECT ProjectID, ProjectName, Description, CompletionDate, CategoryID, tagid FROM Portfolio WHERE ProjectID = $1", projectID).Scan(
 		&portfolio.ProjectID, &portfolio.ProjectName, &portfolio.Description, &portfolio.CompletionDate, &portfolio.CategoryID, &portfolio.TagID)
 	if err != nil {
-		fmt.Printf("%s garfield \n", err)
+		if err == sql.ErrNoRows {
+			// Return a specific error message if the data is not found
+			return nil, fmt.Errorf("portfolio not found for projectID %d", projectID)
+		}
+		// Return the actual error if it's not a "not found" error
 		return nil, err
 	}
 
 	// Query the database to retrieve the images associated with the portfolio entry
 	rows, err := s.db.QueryContext(queryCtx, "SELECT ImageID, ImageUrl FROM PortfolioImages WHERE ProjectID = $1", projectID)
 	if err != nil {
-		fmt.Printf("%s lasagna \n", err)
-
-		return nil, err
+		return nil, fmt.Errorf("failed to query images for projectID %d: %s", projectID, err)
 	}
 	defer rows.Close()
 

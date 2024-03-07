@@ -24,7 +24,8 @@ type IService interface {
 }
 
 func (s *Service) GetPortfolio(ctx echo.Context, req *input.PortfolioReq) (*output.PortfolioRes, error) {
-	res, err := s.storage.GetPortfolio(ctx, 0)
+	portFolioID := req.ProjectID
+	res, err := s.storage.GetPortfolio(ctx, portFolioID)
 	if err != nil {
 		fmt.Println("heyyy")
 		return nil, err
