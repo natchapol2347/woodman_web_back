@@ -20,14 +20,14 @@ func NewService(storage storage.IStorage) *Service {
 }
 
 type IService interface {
-	GetPortfolio(ctx echo.Context, req *input.PortfolioReq) (*output.PortfolioRes, error)
+	GetProject(ctx echo.Context, req *input.ProjectReq) (*output.ProjectRes, error)
 }
 
-func (s *Service) GetPortfolio(ctx echo.Context, req *input.PortfolioReq) (*output.PortfolioRes, error) {
+func (s *Service) GetProject(ctx echo.Context, req *input.ProjectReq) (*output.ProjectRes, error) {
 	portFolioID := req.ProjectID
-	res, err := s.storage.GetPortfolio(ctx, portFolioID)
+	fmt.Printf("what is the ID here? %d \n", portFolioID)
+	res, err := s.storage.GetProject(ctx, portFolioID)
 	if err != nil {
-		fmt.Println("heyyy")
 		return nil, err
 	}
 

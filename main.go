@@ -22,7 +22,7 @@ func main() {
 	h := handler.NewHandler(s)
 	e := echo.New()
 	e.Use(middleware.Logger())
-	e.GET("/portfolio", h.GetPortfolio)
+	e.GET("/project", h.GetProject)
 	e.Logger.Fatal(e.Start("127.0.0.1:1323"))
 
 }

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -20,16 +19,18 @@ func NewHandler(service service.IService) *Handler {
 	}
 
 }
-func (h *Handler) GetPortfolio(ctx echo.Context) error {
-	req := &input.PortfolioReq{}
+func (h *Handler) GetProject(ctx echo.Context) error {
+	req := &input.ProjectReq{}
 	if err := ctx.Bind(&req); err != nil {
 		return err
 	}
 
-	res, err := h.service.GetPortfolio(ctx, req)
+	res, err := h.service.GetProject(ctx, req)
 	if err != nil {
-		fmt.Println(err)
-		return ctx.JSON(http.StatusNotFound, output.ErrorResponse{Error: err.Error()})
+		if customErr, ok := err.(*output.ErrorResponse); ok {
+			return ctx.JSON(customErr.StatusCode, customErr)
+		}
+		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, res)

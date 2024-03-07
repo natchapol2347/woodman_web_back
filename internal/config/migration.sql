@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS Portfolio (
+CREATE TABLE IF NOT EXISTS Project (
     ProjectID SERIAL PRIMARY KEY,
     ProjectName VARCHAR(255) NOT NULL,
     Description TEXT,
@@ -9,11 +9,11 @@ CREATE TABLE IF NOT EXISTS Portfolio (
     CONSTRAINT fk_tag FOREIGN KEY (TagID) REFERENCES Tag(TagID)
 );
 
-CREATE TABLE IF NOT EXISTS PortfolioImages (
+CREATE TABLE IF NOT EXISTS ProjectImage (
     ImageID SERIAL PRIMARY KEY,
     ProjectID INT NOT NULL,
     ImageURL VARCHAR(255) NOT NULL,
-    CONSTRAINT fk_portfolio FOREIGN KEY (ProjectID) REFERENCES Portfolio(ProjectID)
+    CONSTRAINT fk_portfolio FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
 );
 
 CREATE TABLE IF NOT EXISTS ContactForm (
