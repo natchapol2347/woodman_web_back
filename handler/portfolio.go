@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/natchapol2347/woodman_web_back/port/input"
 	"github.com/natchapol2347/woodman_web_back/service"
 )
