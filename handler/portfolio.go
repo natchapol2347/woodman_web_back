@@ -37,13 +37,13 @@ func (h *Handler) GetProject(ctx echo.Context) error {
 
 }
 
-func (h *Handler) GetAllProjects(ctx echo.Context) error {
+func (h *Handler) GetManyProjects(ctx echo.Context) error {
 	// req := &input.AllProjectsReq{}
 	// if err := ctx.Bind(&req); err != nil {
 	// 	return err
 	// }
 
-	res, err := h.service.GetAllProjects(ctx)
+	res, err := h.service.GetManyProjects(ctx)
 	if err != nil {
 		if customErr, ok := err.(*output.ErrorResponse); ok {
 			return ctx.JSON(customErr.StatusCode, customErr)

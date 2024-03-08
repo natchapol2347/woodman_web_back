@@ -9,11 +9,12 @@ type GetProjectRes struct {
 	ProjectName    string             `json:"projectName"`
 	Description    string             `json:"description"`
 	CompletionDate string             `json:"completionDate"`
-	CategoryID     int                `json:"categoryID"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-	TagID          int                `json:"TagID"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
+	CategoryID     *int               `json:"categoryID"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
+	TagID          *int               `json:"TagID"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
 	Images         []ProjectImagesRes `json:"images"`
 }
 
+// for POST operations
 type MessageRes struct {
 	Message string `json:"message"`
 	Data    string `json:"data"`

@@ -19,12 +19,13 @@ func main() {
 	storageClient := storage.NewStorage(db)
 
 	s := service.NewService(storageClient)
-	h := handler.NewHandler(s)
+	handlerPortfolio := handler.NewHandler(s)
 	e := echo.New()
 	e.Use(middleware.Logger())
-	e.GET("/project", h.GetProject)
-	e.GET("/all-projects", h.GetAllProjects)
-	e.POST("/project", h.PostProject)
+	e.GET("/project", handlerPortfolio.GetProject)
+	e.GET("/n-projects", handlerPortfolio.GetManyProjects)
+	e.POST("/project", handlerPortfolio.PostProject)
+
 	e.Logger.Fatal(e.Start("127.0.0.1:1323"))
 
 }

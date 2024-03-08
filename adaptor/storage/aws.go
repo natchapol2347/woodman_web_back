@@ -16,3 +16,5 @@ package storage
 // 	}
 // 	return result.Location, nil
 // }
+
+//https://aws.github.io/aws-sdk-go-v2/docs/sdk-utilities/s3/

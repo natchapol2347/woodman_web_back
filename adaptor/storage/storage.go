@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
@@ -23,7 +24,7 @@ func NewStorage(db *sql.DB) *Storage {
 
 type IStorage interface {
 	GetProject(ctx echo.Context, projectID int) (*output.GetProjectRes, error)
-	GetAllProjects(ctx echo.Context, limit string, offset string) ([]output.GetProjectRes, error)
+	GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, error)
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
 }
 
@@ -31,7 +32,8 @@ func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.GetProjec
 	// Query the database to retrieve the project entry
 	project := &output.GetProjectRes{}
 	queryCtx := ctx.Request().Context()
-	err := s.db.QueryRowContext(queryCtx, "SELECT ProjectID, ProjectName, Description, CompletionDate, CategoryID, Tagid FROM project WHERE ProjectID = $1", projectID).Scan(
+
+	err := s.db.QueryRowContext(queryCtx, "SELECT ProjectID, ProjectName, Description, CompletionDate, CategoryID, TagID FROM project WHERE ProjectID = $1", projectID).Scan(
 		&project.ProjectID, &project.ProjectName, &project.Description, &project.CompletionDate, &project.CategoryID, &project.TagID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -62,13 +64,62 @@ func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.GetProjec
 
 }
 
-func (s *Storage) GetAllProjects(ctx echo.Context, limit string, offset string) ([]output.GetProjectRes, error) {
+func (s *Storage) GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, error) {
+
+	limit, err := strconv.Atoi(ctx.QueryParam("limit"))
+	fmt.Printf("limit %d \n", limit)
+	if err != nil {
+
+		limit = 10 // Default limit
+	}
+
+	offset, err := strconv.Atoi(ctx.QueryParam("offset"))
+	fmt.Printf("offset %d \n", offset)
+
+	if err != nil {
+
+		offset = 0 // Default offset
+	}
+
+	tag := ctx.QueryParam("tagID")
+	category := ctx.QueryParam("categoryID")
+
 	allProjects := []output.GetProjectRes{}
 	queryCtx := ctx.Request().Context()
-	rows, err := s.db.QueryContext(queryCtx, "SELECT ProjectID, ProjectName, Description, CompletionDate, CategoryID, Tagid FROM project LIMIT $1 OFFSET $2", limit, offset)
+	baseQuery := "SELECT ProjectID, ProjectName, Description, CompletionDate, CategoryID, TagID FROM project"
+	queryParams := []interface{}{}
+	whereClause := ""
+
+	// concatenate filter of tag and category permutation
+	if tag != "" {
+		whereClause += "WHERE TagID = $1"
+		queryParams = append(queryParams, tag)
+	} else {
+		fmt.Printf("tag? %s \n", tag)
+	}
+	if category != "" {
+		if whereClause != "" {
+			whereClause += " AND "
+		} else {
+			whereClause += "WHERE "
+		}
+		whereClause += "CategoryID = $" + strconv.Itoa(len(queryParams)+1)
+		queryParams = append(queryParams, category)
+	} else {
+		fmt.Printf("category? %s \n", category)
+	}
+	// Add space if WHERE exist
+	if whereClause != "" {
+		baseQuery += " " + whereClause
+	}
+
+	// Add limit and offset
+	baseQuery += fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
+
+	rows, err := s.db.QueryContext(queryCtx, baseQuery, queryParams...)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("no projects found for limit %s and offset %s", limit, offset), "")
+			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("no projects found for limit %d and offset %d", limit, offset), "")
 		}
 		return nil, err
 	}
@@ -76,6 +127,7 @@ func (s *Storage) GetAllProjects(ctx echo.Context, limit string, offset string) 
 		//map item to project struct
 		item := &output.GetProjectRes{}
 		if err := rows.Scan(&item.ProjectID, &item.ProjectName, &item.Description, &item.CompletionDate, &item.CategoryID, &item.TagID); err != nil {
+			fmt.Println("taek!")
 			return nil, err
 		}
 		//get rows images of that project(item)
@@ -103,7 +155,7 @@ func (s *Storage) GetAllProjects(ctx echo.Context, limit string, offset string) 
 func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error) {
 	var projectID int = req.ProjectID
 	queryCtx := ctx.Request().Context()
-	execRes, err := s.db.ExecContext(queryCtx, "INSERT INTO project (ProjectID, ProjectName, Description, CompletionDate, CategoryID, Tagid) VALUES($1,$2,$3,$4,$5,$6)", projectID, req.ProjectName, req.Description, req.CompletionDate, req.CategoryID, req.TagID)
+	execRes, err := s.db.ExecContext(queryCtx, "INSERT INTO project (ProjectID, ProjectName, Description, CompletionDate, CategoryID, TagID) VALUES($1,$2,$3,$4,$5,$6)", projectID, req.ProjectName, req.Description, req.CompletionDate, req.CategoryID, req.TagID)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
 			// Duplicate key error
@@ -148,19 +200,62 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 
 }
 
-// func (s *Storage) uploadToS3(bucketName string, imageID int, imageData []byte) (string, error) {
-// 	// Upload imageData to S3 bucket 'bucketName' and return the URL
-// 	// Example using AWS SDK for Go (replace 'your-region' with your actual AWS region)
-// 	uploader := s3manager.NewUploaderWithClient(s3.New(s.session.NewSession(&aws.Config{
-// 		Region: aws.String("your-region"),
-// 	})))
-// 	result, err := uploader.Upload(&s3manager.UploadInput{
-// 		Bucket: aws.String(bucketName),
-// 		Key:    aws.String(fmt.Sprintf("images/%d.jpg", imageID)),
-// 		Body:   bytes.NewReader(imageData),
-// 	})
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return result.Location, nil
-// }
+func (s *Storage) UpdateProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error) {
+	queryCtx := ctx.Request().Context()
+
+	// Construct the UPDATE query
+	query := "UPDATE project SET "
+	params := []interface{}{}
+
+	if req.ProjectName != "" {
+		query += "ProjectName = $1, "
+		params = append(params, req.ProjectName)
+	}
+	if req.Description != "" {
+		query += "Description = $2, "
+		params = append(params, req.Description)
+	}
+	if req.CompletionDate != "" {
+		query += "CompletionDate = $3, "
+		params = append(params, req.CompletionDate)
+	}
+	if req.CategoryID != 0 {
+		query += "CategoryID = $4, "
+		params = append(params, req.CategoryID)
+	}
+	if req.TagID != 0 {
+		query += "TagID = $5, "
+		params = append(params, req.TagID)
+	}
+
+	// Remove the trailing comma and space
+	query = query[:len(query)-2]
+
+	// Add the WHERE clause
+	query += " WHERE ProjectID = $6"
+	params = append(params, req.ProjectID)
+
+	// Execute the UPDATE query
+	_, err := s.db.ExecContext(queryCtx, query, params...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Handle image uploads and deletions
+	// for _, v := range req.Images {
+	// 	if v.Action == "upload" {
+	// 		// Upload image to S3 and insert URL into database
+	// 		// Your implementation here
+	// 	} else if v.Action == "delete" {
+	// 		// Delete image from S3 and database
+	// 		// Your implementation here
+	// 	}
+	// }
+
+	msg := fmt.Sprintf("Update to project (ID: %d) successfully", req.ProjectID)
+
+	response := &output.MessageRes{
+		Message: msg,
+	}
+	return response, nil
+}

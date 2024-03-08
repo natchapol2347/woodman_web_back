@@ -19,7 +19,7 @@ func NewService(storage storage.IStorage) *Service {
 
 type IService interface {
 	GetProject(ctx echo.Context, req *input.GetProjectReq) (*output.GetProjectRes, error)
-	GetAllProjects(ctx echo.Context) ([]output.GetProjectRes, error)
+	GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, error)
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
 }
 
@@ -34,10 +34,9 @@ func (s *Service) GetProject(ctx echo.Context, req *input.GetProjectReq) (*outpu
 
 }
 
-func (s *Service) GetAllProjects(ctx echo.Context) ([]output.GetProjectRes, error) {
-	limit := ctx.QueryParam("limit")
-	offset := ctx.QueryParam("offset")
-	res, err := s.storage.GetAllProjects(ctx, limit, offset)
+func (s *Service) GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, error) {
+
+	res, err := s.storage.GetManyProjects(ctx)
 	if err != nil {
 		return nil, err
 	}
