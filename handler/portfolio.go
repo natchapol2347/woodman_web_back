@@ -62,6 +62,9 @@ func (h *Handler) PostProject(ctx echo.Context) error {
 	}
 	res, err := h.service.PostProject(ctx, req)
 	if err != nil {
+		if customErr, ok := err.(*output.ErrorResponse); ok {
+			return ctx.JSON(customErr.StatusCode, customErr)
+		}
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 

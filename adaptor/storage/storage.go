@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lib/pq"
 	"github.com/natchapol2347/woodman_web_back/port/input"
 	"github.com/natchapol2347/woodman_web_back/port/output"
 )
@@ -104,6 +105,12 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 	queryCtx := ctx.Request().Context()
 	execRes, err := s.db.ExecContext(queryCtx, "INSERT INTO project (ProjectID, ProjectName, Description, CompletionDate, CategoryID, Tagid) VALUES($1,$2,$3,$4,$5,$6)", projectID, req.ProjectName, req.Description, req.CompletionDate, req.CategoryID, req.TagID)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			// Duplicate key error
+			fmt.Println("am i not here?")
+			details := fmt.Sprintf("duplicate ID: %d", projectID)
+			return nil, output.NewErrorResponse(http.StatusConflict, "Duplicate key error", details)
+		}
 		return nil, err
 	}
 	rowsAffected, err := execRes.RowsAffected()
@@ -114,6 +121,11 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 	data := fmt.Sprintf("Inserted %d rows", rowsAffected)
 
 	for _, v := range req.Images {
+		//image projectID should always reference from project
+		if v.ProjectID != projectID {
+			details := fmt.Sprintf("projectID of project: %d, projectID from image %d", v.ProjectID, projectID)
+			return nil, output.NewErrorResponse(http.StatusBadRequest, "ProjectID doesn't match", details)
+		}
 		_, err := s.db.ExecContext(queryCtx, "INSERT INTO projectimage (ImageID, ProjectID, ImageUrl) VALUES ($1,$2,$3)", v.ImageID, v.ProjectID, v.ImageUrl)
 		if err != nil {
 			return nil, err
