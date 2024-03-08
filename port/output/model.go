@@ -4,44 +4,7 @@ import (
 	"time"
 )
 
-// CREATE TABLE IF NOT EXISTS Project (
-//     ProjectID INT PRIMARY KEY AUTO_INCREMENT,
-//     ProjectName VARCHAR(255) NOT NULL,
-//     Description TEXT,
-//     CategoryID INT,
-//     TagID INT,
-//     CompletionDate DATE,
-//     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-//     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
-// );
-// CREATE TABLE IF NOT EXISTS ProjectImage (
-//     ImageID INT PRIMARY KEY AUTO_INCREMENT,
-//     ProjectID INT NOT NULL,
-//     ImageURL VARCHAR(255) NOT NULL,
-//     FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
-// );
-// -- ContactForm Table
-// CREATE TABLE IF NOT EXISTS ContactForm (
-//
-//	SubmissionID INT PRIMARY KEY AUTO_INCREMENT,
-//	Name VARCHAR(255) NOT NULL,
-//	Email VARCHAR(255) NOT NULL,
-//	Message TEXT NOT NULL,
-//	Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-//
-// );
-
-// CREATE TABLE IF NOT EXISTS Job (
-//     JobID INT PRIMARY KEY AUTO_INCREMENT,
-//     Title VARCHAR(255) NOT NULL,
-//     Description TEXT,
-//     Requirements TEXT,
-//     Location VARCHAR(255),
-//     DatePosted DATE,
-//     Status VARCHAR(255) DEFAULT 'Open'
-// );
-
-type ProjectRes struct {
+type GetProjectRes struct {
 	ProjectID      int                `json:"projectID"`
 	ProjectName    string             `json:"projectName"`
 	Description    string             `json:"description"`
@@ -49,6 +12,11 @@ type ProjectRes struct {
 	CategoryID     int                `json:"categoryID"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
 	TagID          int                `json:"TagID"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
 	Images         []ProjectImagesRes `json:"images"`
+}
+
+type MessageRes struct {
+	Message string `json:"message"`
+	Data    string `json:"data"`
 }
 
 type ProjectImagesRes struct {

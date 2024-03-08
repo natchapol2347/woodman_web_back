@@ -39,7 +39,7 @@ import "time"
 //     Status VARCHAR(255) DEFAULT 'Open'
 // );
 
-type ProjectReq struct {
+type GetProjectReq struct {
 	ProjectID int `json:"projectID"`
 }
 
@@ -50,6 +50,16 @@ type ProjectImagesReq struct { //not used, but keep it for now just in case!!!
 }
 
 type AllProjectsReq struct {
+}
+
+type PostProjectReq struct {
+	ProjectID      int                `json:"projectID"`
+	ProjectName    string             `json:"projectName"`
+	Description    string             `json:"description"`
+	CompletionDate string             `json:"completionDate"`
+	CategoryID     int                `json:"categoryID"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
+	TagID          int                `json:"TagID"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
+	Images         []ProjectImagesReq `json:"images"`
 }
 
 type ContactFormReq struct {

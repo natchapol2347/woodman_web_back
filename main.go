@@ -24,6 +24,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.GET("/project", h.GetProject)
 	e.GET("/all-projects", h.GetAllProjects)
+	e.POST("/project", h.PostProject)
 	e.Logger.Fatal(e.Start("127.0.0.1:1323"))
 
 }

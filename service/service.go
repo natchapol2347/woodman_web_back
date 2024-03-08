@@ -18,12 +18,13 @@ func NewService(storage storage.IStorage) *Service {
 }
 
 type IService interface {
-	GetProject(ctx echo.Context, req *input.ProjectReq) (*output.ProjectRes, error)
-	GetAllProjects(ctx echo.Context) ([]output.ProjectRes, error)
+	GetProject(ctx echo.Context, req *input.GetProjectReq) (*output.GetProjectRes, error)
+	GetAllProjects(ctx echo.Context) ([]output.GetProjectRes, error)
+	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
 }
 
-func (s *Service) GetProject(ctx echo.Context, req *input.ProjectReq) (*output.ProjectRes, error) {
-	portFolioID := req.ProjectID
+func (s *Service) GetProject(ctx echo.Context, req *input.GetProjectReq) (*output.GetProjectRes, error) {
+	var portFolioID int = req.ProjectID
 	res, err := s.storage.GetProject(ctx, portFolioID)
 	if err != nil {
 		return nil, err
@@ -33,14 +34,22 @@ func (s *Service) GetProject(ctx echo.Context, req *input.ProjectReq) (*output.P
 
 }
 
-func (s *Service) GetAllProjects(ctx echo.Context) ([]output.ProjectRes, error) {
+func (s *Service) GetAllProjects(ctx echo.Context) ([]output.GetProjectRes, error) {
 	limit := ctx.QueryParam("limit")
 	offset := ctx.QueryParam("offset")
 	res, err := s.storage.GetAllProjects(ctx, limit, offset)
 	if err != nil {
 		return nil, err
 	}
+	return res, nil
 
+}
+
+func (s *Service) PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error) {
+	res, err := s.storage.PostProject(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	return res, nil
 
 }
