@@ -28,7 +28,7 @@ func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.ProjectRe
 	// Query the database to retrieve the project entry
 	project := &output.ProjectRes{}
 	queryCtx := ctx.Request().Context()
-	err := s.db.QueryRowContext(queryCtx, "SELECT ProjectID, ProjectName, Description, CompletionDate, CategoryID, tagid FROM project WHERE ProjectID = $1", projectID).Scan(
+	err := s.db.QueryRowContext(queryCtx, "SELECT ProjectID, ProjectName, Description, CompletionDate, CategoryID, Tagid FROM project WHERE ProjectID = $1", projectID).Scan(
 		&project.ProjectID, &project.ProjectName, &project.Description, &project.CompletionDate, &project.CategoryID, &project.TagID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -62,7 +62,7 @@ func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.ProjectRe
 func (s *Storage) GetAllProjects(ctx echo.Context, limit string, offset string) ([]output.ProjectRes, error) {
 	allProjects := []output.ProjectRes{}
 	queryCtx := ctx.Request().Context()
-	rows, err := s.db.QueryContext(queryCtx, "SELECT * FROM project LIMIT $1 OFFSET $2", limit, offset)
+	rows, err := s.db.QueryContext(queryCtx, "SELECT ProjectID, ProjectName, Description, CompletionDate, CategoryID, Tagid FROM project LIMIT $1 OFFSET $2", limit, offset)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("no projects found for limit %s and offset %s", limit, offset), "")
