@@ -2,43 +2,6 @@ package input
 
 import "time"
 
-// CREATE TABLE IF NOT EXISTS Project (
-//     ProjectID INT PRIMARY KEY AUTO_INCREMENT,
-//     ProjectName VARCHAR(255) NOT NULL,
-//     Description TEXT,
-//     CategoryID INT,
-//     TagID INT,
-//     CompletionDate DATE,
-//     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-//     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
-// );
-// CREATE TABLE IF NOT EXISTS ProjectImage (
-//     ImageID INT PRIMARY KEY AUTO_INCREMENT,
-//     ProjectID INT NOT NULL,
-//     ImageURL VARCHAR(255) NOT NULL,
-//     FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
-// );
-// -- ContactForm Table
-// CREATE TABLE IF NOT EXISTS ContactForm (
-//
-//	SubmissionID INT PRIMARY KEY AUTO_INCREMENT,
-//	Name VARCHAR(255) NOT NULL,
-//	Email VARCHAR(255) NOT NULL,
-//	Message TEXT NOT NULL,
-//	Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-//
-// );
-
-// CREATE TABLE IF NOT EXISTS Job (
-//     JobID INT PRIMARY KEY AUTO_INCREMENT,
-//     Title VARCHAR(255) NOT NULL,
-//     Description TEXT,
-//     Requirements TEXT,
-//     Location VARCHAR(255),
-//     DatePosted DATE,
-//     Status VARCHAR(255) DEFAULT 'Open'
-// );
-
 type GetProjectReq struct {
 	ProjectID int `json:"projectID"`
 }

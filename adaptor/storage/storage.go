@@ -126,7 +126,13 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 			details := fmt.Sprintf("projectID of project: %d, projectID from image %d", v.ProjectID, projectID)
 			return nil, output.NewErrorResponse(http.StatusBadRequest, "ProjectID doesn't match", details)
 		}
-		_, err := s.db.ExecContext(queryCtx, "INSERT INTO projectimage (ImageID, ProjectID, ImageUrl) VALUES ($1,$2,$3)", v.ImageID, v.ProjectID, v.ImageUrl)
+
+		// Upload image to S3 (replace 'your-s3-bucket' with your actual S3 bucket name)
+		//  s3URL, err := s.uploadToS3("your-s3-bucket", v.ImageID, v.ImageData)
+		//  if err != nil {
+		// 	 return nil, err
+		//  }
+		_, err := s.db.ExecContext(queryCtx, "INSERT INTO projectimage (ImageID, ProjectID, ImageUrl) VALUES ($1,$2,$3)", v.ImageID, v.ProjectID, v.ImageUrl) //s3URL
 		if err != nil {
 			return nil, err
 		}
@@ -141,3 +147,20 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 	return response, nil
 
 }
+
+// func (s *Storage) uploadToS3(bucketName string, imageID int, imageData []byte) (string, error) {
+// 	// Upload imageData to S3 bucket 'bucketName' and return the URL
+// 	// Example using AWS SDK for Go (replace 'your-region' with your actual AWS region)
+// 	uploader := s3manager.NewUploaderWithClient(s3.New(s.session.NewSession(&aws.Config{
+// 		Region: aws.String("your-region"),
+// 	})))
+// 	result, err := uploader.Upload(&s3manager.UploadInput{
+// 		Bucket: aws.String(bucketName),
+// 		Key:    aws.String(fmt.Sprintf("images/%d.jpg", imageID)),
+// 		Body:   bytes.NewReader(imageData),
+// 	})
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	return result.Location, nil
+// }
