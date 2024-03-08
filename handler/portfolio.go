@@ -36,3 +36,21 @@ func (h *Handler) GetProject(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 
 }
+
+func (h *Handler) GetAllProjects(ctx echo.Context) error {
+	req := &input.AllProjectsReq{}
+	if err := ctx.Bind(&req); err != nil {
+		return err
+	}
+
+	res, err := h.service.GetAllProjects(ctx)
+	if err != nil {
+		if customErr, ok := err.(*output.ErrorResponse); ok {
+			return ctx.JSON(customErr.StatusCode, customErr)
+		}
+		return ctx.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+
+}

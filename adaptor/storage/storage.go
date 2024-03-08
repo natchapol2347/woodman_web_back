@@ -21,6 +21,7 @@ func NewStorage(db *sql.DB) *Storage {
 
 type IStorage interface {
 	GetProject(ctx echo.Context, projectID int) (*output.ProjectRes, error)
+	GetAllProjects(ctx echo.Context, limit string, offset string) ([]output.ProjectRes, error)
 }
 
 func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.ProjectRes, error) {
@@ -32,7 +33,6 @@ func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.ProjectRe
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// Return a specific error message if the data is not found
-			fmt.Println("here??")
 			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("project not found for projectID %d", projectID), "")
 		}
 		// Return the actual error if it's not a "not found" error
@@ -40,21 +40,59 @@ func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.ProjectRe
 	}
 
 	// Query the database to retrieve the images associated with the project entry
-	rows, err := s.db.QueryContext(queryCtx, "SELECT ImageID, ImageUrl FROM ProjectImage WHERE ProjectID = $1", projectID)
+	rowsImage, err := s.db.QueryContext(queryCtx, "SELECT ImageID, ImageUrl FROM ProjectImage WHERE ProjectID = $1", projectID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query images for projectID %d: %s", projectID, err)
 	}
-	defer rows.Close()
+	defer rowsImage.Close()
 
 	// Iterate over the rows and populate the Images slice
-	for rows.Next() {
+	for rowsImage.Next() {
 		image := &output.ProjectImagesRes{}
-		if err := rows.Scan(&image.ImageID, &image.ImageUrl); err != nil {
+		if err := rowsImage.Scan(&image.ImageID, &image.ImageUrl); err != nil {
 			return nil, err
 		}
 		project.Images = append(project.Images, *image)
 	}
 
 	return project, nil
+
+}
+
+func (s *Storage) GetAllProjects(ctx echo.Context, limit string, offset string) ([]output.ProjectRes, error) {
+	allProjects := []output.ProjectRes{}
+	queryCtx := ctx.Request().Context()
+	rows, err := s.db.QueryContext(queryCtx, "SELECT * FROM project LIMIT $1 OFFSET $2", limit, offset)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("no projects found for limit %s and offset %s", limit, offset), "")
+		}
+		return nil, err
+	}
+	for rows.Next() {
+		//map item to project struct
+		item := &output.ProjectRes{}
+		if err := rows.Scan(&item.ProjectID, &item.ProjectName, &item.Description, &item.CompletionDate, &item.CategoryID, &item.TagID); err != nil {
+			return nil, err
+		}
+		//get rows images of that project(item)
+		rowsImage, err := s.db.QueryContext(queryCtx, "SELECT ImageID, ImageUrl FROM ProjectImage WHERE ProjectID = $1", item.ProjectID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to query images for projectID %d: %s", item.ProjectID, err)
+		}
+		defer rowsImage.Close()
+
+		// Iterate over the rows and populate the Images slice
+		for rowsImage.Next() {
+			image := &output.ProjectImagesRes{}
+			if err := rowsImage.Scan(&image.ImageID, &image.ImageUrl); err != nil {
+				return nil, err
+			}
+			item.Images = append(item.Images, *image)
+		}
+		//append whole item to allProjects now
+		allProjects = append(allProjects, *item)
+	}
+	return allProjects, nil
 
 }

@@ -49,6 +49,9 @@ type ProjectImagesReq struct { //not used, but keep it for now just in case!!!
 	ImageUrl  string `json:"imageUrl"`
 }
 
+type AllProjectsReq struct {
+}
+
 type ContactFormReq struct {
 	SubmissionID int       `json:"submissionID"`
 	Name         string    `json:"name"`
