@@ -27,6 +27,8 @@ type IStorage interface {
 	GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error)
 	GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, error)
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
+	DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.MessageRes, error)
+	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error)
 }
 
 func (s *Storage) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error) {
@@ -252,6 +254,24 @@ func (s *Storage) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (
 
 	response := &output.MessageRes{
 		Message: msg,
+	}
+	return response, nil
+}
+
+func (s *Storage) DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.MessageRes, error) {
+	queryCtx := ctx.Request().Context()
+	_, err := s.db.ExecContext(queryCtx, "DELETE FROM project WHERE ProjectID = $1", projectID)
+	if err != nil {
+		// Handle error
+		return nil, err
+	}
+
+	msg := "Delete project successfully"
+	data := fmt.Sprintf("Project ID: %s", projectID.String())
+
+	response := &output.MessageRes{
+		Message: msg,
+		Data:    data,
 	}
 	return response, nil
 }
