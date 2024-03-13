@@ -46,6 +46,7 @@ type PostJobReq struct {
 }
 
 type UpdateProjectReq struct {
+	Action         string             `json:"action" validate:"required"`
 	ProjectID      uuid.UUID          `json:"uuid.UUID" validate:"required"`
 	ProjectName    string             `json:"projectName" validate:"required"`
 	Description    string             `json:"description,omitempty"`

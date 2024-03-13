@@ -186,11 +186,11 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 		}
 	}
 
-	msg := fmt.Sprintf("Insert to project (ID: %s ) successfully", projectID)
-
+	msg := "Insert project successfully"
+	data := fmt.Sprintf("Project ID: %s", projectID)
 	response := &output.MessageRes{
 		Message: msg,
-		Data:    "",
+		Data:    data,
 	}
 	return response, nil
 
