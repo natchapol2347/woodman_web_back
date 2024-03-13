@@ -3,10 +3,10 @@ module github.com/natchapol2347/woodman_web_back
 go 1.21.5
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/lib/pq v1.10.9
-	github.com/pkg/errors v0.9.1
 )
 
 require (

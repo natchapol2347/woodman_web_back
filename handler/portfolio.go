@@ -9,17 +9,17 @@ import (
 	"github.com/natchapol2347/woodman_web_back/service"
 )
 
-type Handler struct {
+type PortfolioHandler struct {
 	service service.IService
 }
 
-func NewHandler(service service.IService) *Handler {
-	return &Handler{
+func NewPortfolioHandler(service service.IService) *PortfolioHandler {
+	return &PortfolioHandler{
 		service: service,
 	}
 
 }
-func (h *Handler) GetProject(ctx echo.Context) error {
+func (h *PortfolioHandler) GetProject(ctx echo.Context) error {
 	req := &input.GetProjectReq{}
 	if err := ctx.Bind(&req); err != nil {
 		return err
@@ -37,7 +37,7 @@ func (h *Handler) GetProject(ctx echo.Context) error {
 
 }
 
-func (h *Handler) GetManyProjects(ctx echo.Context) error {
+func (h *PortfolioHandler) GetManyProjects(ctx echo.Context) error {
 	// req := &input.AllProjectsReq{}
 	// if err := ctx.Bind(&req); err != nil {
 	// 	return err
@@ -55,7 +55,7 @@ func (h *Handler) GetManyProjects(ctx echo.Context) error {
 
 }
 
-func (h *Handler) PostProject(ctx echo.Context) error {
+func (h *PortfolioHandler) PostProject(ctx echo.Context) error {
 	req := &input.PostProjectReq{}
 	if err := ctx.Bind(&req); err != nil {
 		return err

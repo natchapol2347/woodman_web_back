@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/natchapol2347/woodman_web_back/adaptor/storage"
 	"github.com/natchapol2347/woodman_web_back/port/input"
@@ -24,7 +25,7 @@ type IService interface {
 }
 
 func (s *Service) GetProject(ctx echo.Context, req *input.GetProjectReq) (*output.GetProjectRes, error) {
-	var portFolioID int = req.ProjectID
+	var portFolioID uuid.UUID = req.ProjectID
 	res, err := s.storage.GetProject(ctx, portFolioID)
 	if err != nil {
 		return nil, err

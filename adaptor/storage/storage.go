@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
 	"github.com/natchapol2347/woodman_web_back/port/input"
@@ -23,12 +24,12 @@ func NewStorage(db *sql.DB) *Storage {
 }
 
 type IStorage interface {
-	GetProject(ctx echo.Context, projectID int) (*output.GetProjectRes, error)
+	GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error)
 	GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, error)
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
 }
 
-func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.GetProjectRes, error) {
+func (s *Storage) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error) {
 	// Query the database to retrieve the project entry
 	project := &output.GetProjectRes{}
 	queryCtx := ctx.Request().Context()
@@ -45,7 +46,7 @@ func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.GetProjec
 	}
 
 	// Query the database to retrieve the images associated with the project entry
-	rowsImage, err := s.db.QueryContext(queryCtx, "SELECT ImageID, ImageUrl FROM ProjectImage WHERE ProjectID = $1", projectID)
+	rowsImage, err := s.db.QueryContext(queryCtx, "SELECT ImageID, ProjectID, ImageUrl FROM ProjectImage WHERE ProjectID = $1", projectID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query images for projectID %d: %s", projectID, err)
 	}
@@ -54,7 +55,7 @@ func (s *Storage) GetProject(ctx echo.Context, projectID int) (*output.GetProjec
 	// Iterate over the rows and populate the Images slice
 	for rowsImage.Next() {
 		image := &output.ProjectImagesRes{}
-		if err := rowsImage.Scan(&image.ImageID, &image.ImageUrl); err != nil {
+		if err := rowsImage.Scan(&image.ImageID, &image.ProjectID, &image.ImageUrl); err != nil {
 			return nil, err
 		}
 		project.Images = append(project.Images, *image)
@@ -127,11 +128,10 @@ func (s *Storage) GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, err
 		//map item to project struct
 		item := &output.GetProjectRes{}
 		if err := rows.Scan(&item.ProjectID, &item.ProjectName, &item.Description, &item.CompletionDate, &item.CategoryID, &item.TagID); err != nil {
-			fmt.Println("taek!")
 			return nil, err
 		}
 		//get rows images of that project(item)
-		rowsImage, err := s.db.QueryContext(queryCtx, "SELECT ImageID, ImageUrl FROM ProjectImage WHERE ProjectID = $1", item.ProjectID)
+		rowsImage, err := s.db.QueryContext(queryCtx, "SELECT ImageID, ProjectID, ImageUrl FROM ProjectImage WHERE ProjectID = $1", item.ProjectID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to query images for projectID %d: %s", item.ProjectID, err)
 		}
@@ -140,7 +140,7 @@ func (s *Storage) GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, err
 		// Iterate over the rows and populate the Images slice
 		for rowsImage.Next() {
 			image := &output.ProjectImagesRes{}
-			if err := rowsImage.Scan(&image.ImageID, &image.ImageUrl); err != nil {
+			if err := rowsImage.Scan(&image.ImageID, &image.ProjectID, &image.ImageUrl); err != nil {
 				return nil, err
 			}
 			item.Images = append(item.Images, *image)
@@ -153,29 +153,25 @@ func (s *Storage) GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, err
 }
 
 func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error) {
-	var projectID int = req.ProjectID
+	var projectID string
 	queryCtx := ctx.Request().Context()
-	execRes, err := s.db.ExecContext(queryCtx, "INSERT INTO project (ProjectID, ProjectName, Description, CompletionDate, CategoryID, TagID) VALUES($1,$2,$3,$4,$5,$6)", projectID, req.ProjectName, req.Description, req.CompletionDate, req.CategoryID, req.TagID)
+	err := s.db.QueryRowContext(queryCtx, "INSERT INTO project (ProjectName, Description, CompletionDate, CategoryID, TagID) VALUES($1,$2,$3,$4,$5) RETURNING ProjectID", req.ProjectName, req.Description, req.CompletionDate, req.CategoryID, req.TagID).Scan(&projectID)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
 			// Duplicate key error
-			fmt.Println("am i not here?")
-			details := fmt.Sprintf("duplicate ID: %d", projectID)
+			details := fmt.Sprintf("duplicate ID: %s", projectID)
 			return nil, output.NewErrorResponse(http.StatusConflict, "Duplicate key error", details)
 		}
 		return nil, err
 	}
-	rowsAffected, err := execRes.RowsAffected()
+	uuidProjID, err := uuid.Parse(projectID)
 	if err != nil {
 		return nil, err
 	}
-	// Construct a message based on the rows affected
-	data := fmt.Sprintf("Inserted %d rows", rowsAffected)
-
 	for _, v := range req.Images {
 		//image projectID should always reference from project
-		if v.ProjectID != projectID {
-			details := fmt.Sprintf("projectID of project: %d, projectID from image %d", v.ProjectID, projectID)
+		if v.ProjectID != uuidProjID {
+			details := fmt.Sprintf("projectID of project: %s, projectID from image %s", v.ProjectID.String(), projectID)
 			return nil, output.NewErrorResponse(http.StatusBadRequest, "ProjectID doesn't match", details)
 		}
 
@@ -190,17 +186,17 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 		}
 	}
 
-	msg := fmt.Sprintf("Insert to project (ID: %d ) successfully", projectID)
+	msg := fmt.Sprintf("Insert to project (ID: %s ) successfully", projectID)
 
 	response := &output.MessageRes{
 		Message: msg,
-		Data:    data,
+		Data:    "",
 	}
 	return response, nil
 
 }
 
-func (s *Storage) UpdateProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error) {
+func (s *Storage) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error) {
 	queryCtx := ctx.Request().Context()
 
 	// Construct the UPDATE query
@@ -219,13 +215,13 @@ func (s *Storage) UpdateProject(ctx echo.Context, req *input.PostProjectReq) (*o
 		query += "CompletionDate = $3, "
 		params = append(params, req.CompletionDate)
 	}
-	if req.CategoryID != 0 {
+	if req.CategoryID != nil {
 		query += "CategoryID = $4, "
-		params = append(params, req.CategoryID)
+		params = append(params, *req.CategoryID)
 	}
-	if req.TagID != 0 {
+	if req.TagID != nil {
 		query += "TagID = $5, "
-		params = append(params, req.TagID)
+		params = append(params, *req.TagID)
 	}
 
 	// Remove the trailing comma and space

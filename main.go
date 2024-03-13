@@ -19,7 +19,7 @@ func main() {
 	storageClient := storage.NewStorage(db)
 
 	s := service.NewService(storageClient)
-	handlerPortfolio := handler.NewHandler(s)
+	handlerPortfolio := handler.NewPortfolioHandler(s)
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.GET("/project", handlerPortfolio.GetProject)

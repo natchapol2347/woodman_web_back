@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS Project (
-    ProjectID SERIAL PRIMARY KEY,
+    ProjectID UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     ProjectName VARCHAR(255) NOT NULL,
     Description TEXT,
     CategoryID INT,
@@ -10,14 +10,14 @@ CREATE TABLE IF NOT EXISTS Project (
 );
 
 CREATE TABLE IF NOT EXISTS ProjectImage (
-    ImageID SERIAL PRIMARY KEY,
+    ImageID  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     ProjectID INT NOT NULL,
     ImageURL VARCHAR(255) NOT NULL,
     CONSTRAINT fk_portfolio FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
 );
 
 CREATE TABLE IF NOT EXISTS ContactForm (
-    SubmissionID SERIAL PRIMARY KEY,
+    SubmissionID  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL,
     Message TEXT NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS ContactForm (
 );
 
 CREATE TABLE IF NOT EXISTS Job (
-    JobID SERIAL PRIMARY KEY,
+    JobID  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     Title VARCHAR(255) NOT NULL,
     Description TEXT,
     Requirements TEXT,
@@ -35,11 +35,11 @@ CREATE TABLE IF NOT EXISTS Job (
 );
 
 CREATE TABLE IF NOT EXISTS Category (
-    CategoryID SERIAL PRIMARY KEY,
+    CategoryID  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     CategoryName VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Tag (
-    TagID SERIAL PRIMARY KEY,
+    TagID  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     TagName VARCHAR(255) NOT NULL
 );
