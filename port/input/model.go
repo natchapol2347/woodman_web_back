@@ -11,9 +11,8 @@ type GetProjectReq struct {
 }
 
 type ProjectImagesReq struct { //not used, but keep it for now just in case!!!
-	ImageID   uuid.UUID `json:"imageID"`
-	ProjectID uuid.UUID `json:"projectID"` //     		 FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
-	ImageUrl  string    `json:"imageUrl"`
+	// ProjectID uuid.UUID `json:"projectID"` //     		 FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
+	ImageUrl string `json:"imageUrl"`
 }
 
 type AllProjectsReq struct {

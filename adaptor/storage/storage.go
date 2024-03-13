@@ -170,17 +170,17 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 	}
 	for _, v := range req.Images {
 		//image projectID should always reference from project
-		if v.ProjectID != uuidProjID {
-			details := fmt.Sprintf("projectID of project: %s, projectID from image %s", v.ProjectID.String(), projectID)
-			return nil, output.NewErrorResponse(http.StatusBadRequest, "ProjectID doesn't match", details)
-		}
+		// if v.ProjectID != uuidProjID {
+		// 	details := fmt.Sprintf("projectID of project: %s, projectID from image %s", v.ProjectID.String(), projectID)
+		// 	return nil, output.NewErrorResponse(http.StatusBadRequest, "ProjectID doesn't match", details)
+		// }
 
 		// Upload image to S3 (replace 'your-s3-bucket' with your actual S3 bucket name)
 		//  s3URL, err := s.uploadToS3("your-s3-bucket", v.ImageID, v.ImageData)
 		//  if err != nil {
 		// 	 return nil, err
 		//  }
-		_, err := s.db.ExecContext(queryCtx, "INSERT INTO projectimage (ImageID, ProjectID, ImageUrl) VALUES ($1,$2,$3)", v.ImageID, v.ProjectID, v.ImageUrl) //s3URL
+		_, err := s.db.ExecContext(queryCtx, "INSERT INTO projectimage (ProjectID, ImageUrl) VALUES ($1,$2)", uuidProjID, v.ImageUrl) //s3URL
 		if err != nil {
 			return nil, err
 		}
