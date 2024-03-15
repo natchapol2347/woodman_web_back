@@ -6,16 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-type GetProjectReq struct {
-	ProjectID uuid.UUID `json:"projectID" validate:"required"`
-}
-
 type ProjectImagesReq struct { //not used, but keep it for now just in case!!!
 	// ProjectID uuid.UUID `json:"projectID"` //     		 FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
 	ImageUrl string `json:"imageUrl"`
-}
-
-type AllProjectsReq struct {
 }
 
 type PostProjectReq struct {
@@ -33,9 +26,6 @@ type ContactFormReq struct {
 	Email     string    `json:"email"`
 	Message   string    `json:"message"`
 	Timestamp time.Time `json:"timeStamp"`
-}
-
-type GetJobReq struct {
 }
 
 type PostJobReq struct {

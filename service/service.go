@@ -19,14 +19,18 @@ func NewService(storage storage.IStorage) *Service {
 }
 
 type IService interface {
-	GetProject(ctx echo.Context, req *input.GetProjectReq) (*output.GetProjectRes, error)
+	GetProject(ctx echo.Context) (*output.GetProjectRes, error)
 	GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, error)
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
+	DeleteProject(ctx echo.Context) (*output.MessageRes, error)
 }
 
-func (s *Service) GetProject(ctx echo.Context, req *input.GetProjectReq) (*output.GetProjectRes, error) {
-	var portFolioID uuid.UUID = req.ProjectID
-	res, err := s.storage.GetProject(ctx, portFolioID)
+func (s *Service) GetProject(ctx echo.Context) (*output.GetProjectRes, error) {
+	projectID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.storage.GetProject(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -52,4 +56,16 @@ func (s *Service) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 	}
 	return res, nil
 
+}
+
+func (s *Service) DeleteProject(ctx echo.Context) (*output.MessageRes, error) {
+	projectID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.storage.DeleteProject(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }

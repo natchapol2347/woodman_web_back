@@ -22,9 +22,10 @@ func main() {
 	handlerPortfolio := handler.NewPortfolioHandler(s)
 	e := echo.New()
 	e.Use(middleware.Logger())
-	e.GET("/project", handlerPortfolio.GetProject)
-	e.GET("/n-projects", handlerPortfolio.GetManyProjects)
+	e.GET("/project/:id", handlerPortfolio.GetProject)
+	e.GET("/projects", handlerPortfolio.GetManyProjects)
 	e.POST("/project", handlerPortfolio.PostProject)
+	e.DELETE("/remove-project/:id", handlerPortfolio.DeleteProject)
 
 	e.Logger.Fatal(e.Start("127.0.0.1:1323"))
 
