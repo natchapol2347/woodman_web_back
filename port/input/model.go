@@ -7,8 +7,8 @@ import (
 )
 
 type ProjectImagesReq struct { //not used, but keep it for now just in case!!!
-	// ProjectID uuid.UUID `json:"projectID"` //     		 FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
-	ImageUrl string `json:"imageUrl"`
+	ImageID  uuid.UUID `json:"imageID,omitempty"` //     		 FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
+	ImageUrl string    `json:"imageUrl"`
 }
 
 type PostProjectReq struct {
@@ -43,5 +43,6 @@ type UpdateProjectReq struct {
 	CompletionDate string             `json:"completionDate" validate:"required"`
 	CategoryID     *uuid.UUID         `json:"categoryID,omitempty"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
 	TagID          *uuid.UUID         `json:"TagID,omitempty"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
-	Images         []ProjectImagesReq `json:"images"`
+	DeleteImages   []ProjectImagesReq `json:"deleteImages"`
+	InsertImages   []ProjectImagesReq `json:"insertImages"`
 }

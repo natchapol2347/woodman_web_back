@@ -78,3 +78,19 @@ func (h *PortfolioHandler) DeleteProject(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 
 }
+
+func (h *PortfolioHandler) UpdateProject(ctx echo.Context) error {
+	req := &input.UpdateProjectReq{}
+	if err := ctx.Bind(&req); err != nil {
+		return err
+	}
+	res, err := h.service.UpdateProject(ctx, req)
+	if err != nil {
+		if customErr, ok := err.(*output.ErrorResponse); ok {
+			return ctx.JSON(customErr.StatusCode, customErr)
+		}
+		return ctx.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}

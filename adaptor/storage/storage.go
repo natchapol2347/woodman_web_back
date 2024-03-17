@@ -171,11 +171,6 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 		return nil, err
 	}
 	for _, v := range req.Images {
-		//image projectID should always reference from project
-		// if v.ProjectID != uuidProjID {
-		// 	details := fmt.Sprintf("projectID of project: %s, projectID from image %s", v.ProjectID.String(), projectID)
-		// 	return nil, output.NewErrorResponse(http.StatusBadRequest, "ProjectID doesn't match", details)
-		// }
 
 		// Upload image to S3 (replace 'your-s3-bucket' with your actual S3 bucket name)
 		//  s3URL, err := s.uploadToS3("your-s3-bucket", v.ImageID, v.ImageData)
@@ -240,20 +235,29 @@ func (s *Storage) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (
 	}
 
 	// Handle image uploads and deletions
-	// for _, v := range req.Images {
-	// 	if v.Action == "upload" {
-	// 		// Upload image to S3 and insert URL into database
-	// 		// Your implementation here
-	// 	} else if v.Action == "delete" {
-	// 		// Delete image from S3 and database
-	// 		// Your implementation here
-	// 	}
-	// }
+	for _, v := range req.InsertImages {
+
+		// Upload image to S3 and insert URL into database
+		_, err := s.db.ExecContext(queryCtx, "INSERT INTO projectimage (ProjectID, ImageUrl) VALUES ($1,$2)", req.ProjectID, v.ImageUrl) //s3URL
+		if err != nil {
+			return nil, err
+
+		}
+	}
+
+	for _, v := range req.DeleteImages {
+		_, err := s.db.ExecContext(queryCtx, "DELETE FROM projectimage WHERE ImageID = $1", v.ImageID)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	msg := fmt.Sprintf("Update to project (ID: %d) successfully", req.ProjectID)
+	data := fmt.Sprintf("inserted %d images and deleted %d images", len(req.InsertImages), len(req.DeleteImages))
 
 	response := &output.MessageRes{
 		Message: msg,
+		Data:    data,
 	}
 	return response, nil
 }
