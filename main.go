@@ -20,6 +20,7 @@ func main() {
 
 	s := service.NewService(storageClient)
 	handlerPortfolio := handler.NewPortfolioHandler(s)
+	handlerJob := handler.NewJobHandler(s)
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.GET("/project/:id", handlerPortfolio.GetProject)
@@ -27,6 +28,8 @@ func main() {
 	e.POST("/project", handlerPortfolio.PostProject)
 	e.DELETE("/remove-project/:id", handlerPortfolio.DeleteProject)
 	e.PUT("/update-project/:id", handlerPortfolio.UpdateProject)
+	e.GET("/jobs", handlerJob.GetManyJobs)
+
 	e.Logger.Fatal(e.Start("127.0.0.1:1323"))
 
 }

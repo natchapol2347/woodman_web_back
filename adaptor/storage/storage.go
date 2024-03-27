@@ -29,6 +29,7 @@ type IStorage interface {
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
 	DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.MessageRes, error)
 	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error)
+	GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error)
 }
 
 func (s *Storage) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error) {
