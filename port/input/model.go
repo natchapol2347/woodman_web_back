@@ -15,8 +15,8 @@ type PostProjectReq struct {
 	ProjectName    string             `json:"projectName" validate:"required"`
 	Description    string             `json:"description,omitempty"`
 	CompletionDate string             `json:"completionDate" validate:"required"`
-	CategoryID     *uuid.UUID         `json:"categoryID,omitempty"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-	TagID          *uuid.UUID         `json:"TagID,omitempty"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
+	CategoryID     uuid.UUID          `json:"categoryID,omitempty"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
+	TagID          uuid.UUID          `json:"TagID,omitempty"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
 	Images         []ProjectImagesReq `json:"images"`
 }
 
@@ -36,13 +36,11 @@ type PostJobReq struct {
 }
 
 type UpdateProjectReq struct {
-	Action         string             `json:"action" validate:"required"`
-	ProjectID      uuid.UUID          `json:"uuid.UUID" validate:"required"`
 	ProjectName    string             `json:"projectName" validate:"required"`
 	Description    string             `json:"description,omitempty"`
 	CompletionDate string             `json:"completionDate" validate:"required"`
-	CategoryID     *uuid.UUID         `json:"categoryID,omitempty"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-	TagID          *uuid.UUID         `json:"TagID,omitempty"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
+	CategoryID     uuid.UUID          `json:"categoryID,omitempty"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
+	TagID          uuid.UUID          `json:"TagID,omitempty"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
 	DeleteImages   []ProjectImagesReq `json:"deleteImages"`
 	InsertImages   []ProjectImagesReq `json:"insertImages"`
 }

@@ -11,16 +11,9 @@ type GetProjectRes struct {
 	ProjectName    string             `json:"projectName"`
 	Description    string             `json:"description"`
 	CompletionDate string             `json:"completionDate"`
-	CategoryID     *uuid.UUID         `json:"categoryID,omitempty"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-	TagID          *uuid.UUID         `json:"TagID,omitempty"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
-	Images         []ProjectImagesRes `json:"images"`
-}
-
-type GetJobRes struct {
-	Title          string `json:"title"`
-	Overview       string `json:"overview"`
-	Qualification  string `json:"qualificatoin"`
-	Responsibility string `json:"responsibility"`
+	CategoryID     uuid.UUID          `json:"categoryID,omitempty"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
+	TagID          uuid.UUID          `json:"TagID,omitempty"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
+	Images         []ProjectImagesRes `json:"images,omitempty"`
 }
 
 // for POST operations
@@ -43,14 +36,24 @@ type ContactFormRes struct {
 	Timestamp    time.Time `json:"timeStamp"`
 }
 
-type JobRes struct {
-	JobID        uuid.UUID `json:"jobID"`
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	Requirements string    `json:"requirements"`
-	Location     string    `json:"location"`
-	DatePosted   string    `json:"datePosted"`
-	Status       string    `json:"status"`
+type GetJobRes struct {
+	JobID          uuid.UUID `json:"jobID"`
+	Title          string    `json:"title"`
+	Status         string    `json:"status"`
+	Salary         string    `json:"salary"`
+	EmploymentType string    `json:"employmentType"`
+}
+
+type GetJobResAll struct {
+	JobID          uuid.UUID `json:"jobID"`
+	Title          string    `json:"title"`
+	Description    string    `json:"description"`
+	Requirements   string    `json:"requirements"`
+	Location       string    `json:"location"`
+	DatePosted     string    `json:"datePosted"`
+	Status         string    `json:"status"`
+	Salary         string    `json:"salary"`
+	EmploymentType string    `json:"employmentType"`
 }
 
 type ErrorResponse struct {

@@ -195,51 +195,65 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 
 func (s *Storage) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error) {
 	queryCtx := ctx.Request().Context()
-
+	var projectID string = ctx.Param("id")
+	uuidProjID, err := uuid.Parse(projectID)
+	if err != nil {
+		return nil, err
+	}
 	// Construct the UPDATE query
 	query := "UPDATE project SET "
 	params := []interface{}{}
 
-	if req.ProjectName != "" {
-		query += "ProjectName = $1, "
-		params = append(params, req.ProjectName)
-	}
-	if req.Description != "" {
-		query += "Description = $2, "
-		params = append(params, req.Description)
-	}
-	if req.CompletionDate != "" {
-		query += "CompletionDate = $3, "
-		params = append(params, req.CompletionDate)
-	}
-	if req.CategoryID != nil {
-		query += "CategoryID = $4, "
-		params = append(params, *req.CategoryID)
-	}
-	if req.TagID != nil {
-		query += "TagID = $5, "
-		params = append(params, *req.TagID)
-	}
+	var index int = 1
+	if req.ProjectName != "" && req.Description != "" && req.CompletionDate != "" && req.CategoryID != uuid.Nil && req.TagID != uuid.Nil {
+		if req.ProjectName != "" {
+			query += "ProjectName = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.ProjectName)
+			index++
+		}
+		if req.Description != "" {
+			query += "Description = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.Description)
+			index++
+		}
+		if req.CompletionDate != "" {
+			query += "CompletionDate = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.CompletionDate)
+			index++
+		}
+		if req.CategoryID != uuid.Nil {
+			query += "CategoryID = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.CategoryID)
+			index++
+		}
+		if req.TagID != uuid.Nil {
+			query += "TagID = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.TagID)
+			index++
+		}
 
-	// Remove the trailing comma and space
-	query = query[:len(query)-2]
+		// Remove the trailing comma and space
+		query = query[:len(query)-2]
 
-	// Add the WHERE clause
-	query += " WHERE ProjectID = $6"
-	params = append(params, req.ProjectID)
+		// Add the WHERE clause
+		query += " WHERE ProjectID = $" + strconv.Itoa(index)
+		params = append(params, uuidProjID)
 
-	// Execute the UPDATE query
-	_, err := s.db.ExecContext(queryCtx, query, params...)
-	if err != nil {
-		return nil, err
+		// Execute the UPDATE query
+		_, err := s.db.ExecContext(queryCtx, query, params...)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	// Handle image uploads and deletions
 	for _, v := range req.InsertImages {
 
 		// Upload image to S3 and insert URL into database
-		_, err := s.db.ExecContext(queryCtx, "INSERT INTO projectimage (ProjectID, ImageUrl) VALUES ($1,$2)", req.ProjectID, v.ImageUrl) //s3URL
+		_, err := s.db.ExecContext(queryCtx, "INSERT INTO projectimage (ProjectID, ImageUrl) VALUES ($1,$2)", uuidProjID, v.ImageUrl) //s3URL
 		if err != nil {
+			fmt.Println("err!", err)
 			return nil, err
 
 		}
@@ -252,7 +266,7 @@ func (s *Storage) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (
 		}
 	}
 
-	msg := fmt.Sprintf("Update to project (ID: %d) successfully", req.ProjectID)
+	msg := fmt.Sprintf("Update to project (ID: %s) successfully", projectID)
 	data := fmt.Sprintf("inserted %d images and deleted %d images", len(req.InsertImages), len(req.DeleteImages))
 
 	response := &output.MessageRes{
@@ -278,4 +292,27 @@ func (s *Storage) DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.
 		Data:    data,
 	}
 	return response, nil
+}
+
+// make separate struct, many jobs and get one job
+func (s *Storage) GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error) {
+	queryCtx := ctx.Request().Context()
+	allJobs := []output.GetJobResAll{}
+	rows, err := s.db.QueryContext(queryCtx, "SELECT JobID, Title, Description, Requirements, Location, Dateposted, Status, Salary, EmploymentType FROM job")
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, output.NewErrorResponse(http.StatusNotFound, "no jobs found", "")
+		}
+		return nil, err
+	}
+	for rows.Next() {
+		//map item to project struct
+		item := &output.GetJobResAll{}
+		if err := rows.Scan(&item.JobID, &item.Title, &item.Description, &item.Requirements, &item.Location, &item.DatePosted, &item.Status, &item.Salary, &item.EmploymentType); err != nil {
+			return nil, err
+		}
+
+		allJobs = append(allJobs, *item)
+	}
+	return allJobs, nil
 }
