@@ -30,9 +30,13 @@ type ContactFormReq struct {
 
 type PostJobReq struct {
 	Title          string `json:"title"`
-	Overview       string `json:"overview"`
-	Qualification  string `json:"qualificatoin"`
-	Responsibility string `json:"responsibility"`
+	Description    string `json:"description"`
+	Requirements   string `json:"requirements"`
+	Location       string `json:"location"`
+	DatePosted     string `json:"datePosted"`
+	Status         string `json:"status"`
+	Salary         string `json:"salary"`
+	EmploymentType string `json:"employmentType"`
 }
 
 type UpdateProjectReq struct {

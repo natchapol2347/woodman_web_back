@@ -25,6 +25,7 @@ type IService interface {
 	DeleteProject(ctx echo.Context) (*output.MessageRes, error)
 	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error)
 	GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error)
+	PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error)
 }
 
 func (s *Service) GetProject(ctx echo.Context) (*output.GetProjectRes, error) {
@@ -82,6 +83,14 @@ func (s *Service) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (
 
 func (s *Service) GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error) {
 	res, err := s.storage.GetManyJobs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (s *Service) PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error) {
+	res, err := s.storage.PostJob(ctx, req)
 	if err != nil {
 		return nil, err
 	}

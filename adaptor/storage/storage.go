@@ -30,6 +30,7 @@ type IStorage interface {
 	DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.MessageRes, error)
 	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error)
 	GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error)
+	PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error)
 }
 
 func (s *Storage) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error) {
@@ -316,4 +317,31 @@ func (s *Storage) GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error) {
 		allJobs = append(allJobs, *item)
 	}
 	return allJobs, nil
+}
+
+func (s *Storage) PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error) {
+	var jobID string
+	queryCtx := ctx.Request().Context()
+	err := s.db.QueryRowContext(queryCtx, "INSERT INTO job (Title, Description, Requirements, Location, Dateposted, Status, Salary, EmploymentType) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING JobId", req.Title, req.Description, req.Requirements, req.Location, req.DatePosted, req.Status, req.Salary, req.EmploymentType).Scan(&jobID)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			// Duplicate key error
+			details := fmt.Sprintf("duplicate ID: %s", jobID)
+			return nil, output.NewErrorResponse(http.StatusConflict, "Duplicate key error", details)
+		}
+		return nil, err
+	}
+	// uuidProjID, err := uuid.Parse(jobID)
+	if err != nil {
+		return nil, err
+	}
+
+	msg := "Insert project successfully"
+	data := fmt.Sprintf("Project ID: %s", jobID)
+	response := &output.MessageRes{
+		Message: msg,
+		Data:    data,
+	}
+	return response, nil
+
 }
