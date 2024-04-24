@@ -44,7 +44,7 @@ func (s *Storage) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.Get
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// Return a specific error message if the data is not found
-			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("project not found for projectID %d", projectID), "")
+			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("project not found for projectID %s", projectID.String()), "")
 		}
 		// Return the actual error if it's not a "not found" error
 		return nil, err
@@ -358,7 +358,7 @@ func (s *Storage) GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, 
 
 			// Return a specific error message if the data is not found
 			fmt.Println(jobID.String())
-			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("job not foundsdf for jobID %s", jobID.String()), "")
+			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("job not found for jobID %s", jobID.String()), "")
 		}
 		// Return the actual error if it's not a "not found" error
 		return nil, err
