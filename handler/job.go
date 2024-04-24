@@ -22,7 +22,7 @@ func NewJobHandler(service service.IService) *JobHandler {
 
 func (h *JobHandler) GetJob(ctx echo.Context) error {
 
-	res, err := h.service.GetProject(ctx)
+	res, err := h.service.GetJob(ctx)
 	if err != nil {
 		if customErr, ok := err.(*output.ErrorResponse); ok {
 			return ctx.JSON(customErr.StatusCode, customErr)

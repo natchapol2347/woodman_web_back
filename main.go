@@ -29,7 +29,9 @@ func main() {
 	e.DELETE("/remove-project/:id", handlerPortfolio.DeleteProject)
 	e.PUT("/update-project/:id", handlerPortfolio.UpdateProject)
 	e.GET("/jobs", handlerJob.GetManyJobs)
+	e.GET("/job/:id", handlerJob.GetJob)
 	e.POST("/job", handlerJob.PostJob)
+
 	e.Logger.Fatal(e.Start("127.0.0.1:1323"))
 
 }

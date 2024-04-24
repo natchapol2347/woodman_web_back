@@ -29,8 +29,9 @@ type IStorage interface {
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
 	DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.MessageRes, error)
 	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error)
-	GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error)
+	GetManyJobs(ctx echo.Context) ([]output.GetManyJobRes, error)
 	PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error)
+	GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, error)
 }
 
 func (s *Storage) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error) {
@@ -297,9 +298,9 @@ func (s *Storage) DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.
 }
 
 // make separate struct, many jobs and get one job
-func (s *Storage) GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error) {
+func (s *Storage) GetManyJobs(ctx echo.Context) ([]output.GetManyJobRes, error) {
 	queryCtx := ctx.Request().Context()
-	allJobs := []output.GetJobResAll{}
+	allJobs := []output.GetManyJobRes{}
 	rows, err := s.db.QueryContext(queryCtx, "SELECT JobID, Title, Description, Requirements, Location, Dateposted, Status, Salary, EmploymentType FROM job")
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -309,7 +310,7 @@ func (s *Storage) GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error) {
 	}
 	for rows.Next() {
 		//map item to project struct
-		item := &output.GetJobResAll{}
+		item := &output.GetManyJobRes{}
 		if err := rows.Scan(&item.JobID, &item.Title, &item.Description, &item.Requirements, &item.Location, &item.DatePosted, &item.Status, &item.Salary, &item.EmploymentType); err != nil {
 			return nil, err
 		}
@@ -344,4 +345,23 @@ func (s *Storage) PostJob(ctx echo.Context, req *input.PostJobReq) (*output.Mess
 	}
 	return response, nil
 
+}
+
+func (s *Storage) GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, error) {
+	job := &output.GetJobRes{}
+	queryCtx := ctx.Request().Context()
+	err := s.db.QueryRowContext(queryCtx, "SELECT Title, Description, Requirements, Location, Dateposted, Status, Salary, EmploymentType FROM job WHERE JobId = $1", jobID).Scan(
+		&job.Title, &job.Description, &job.Requirements, &job.Location, &job.DatePosted, &job.Status, &job.Salary, &job.EmploymentType)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+
+			// Return a specific error message if the data is not found
+			fmt.Println(jobID.String())
+			return nil, output.NewErrorResponse(http.StatusNotFound, fmt.Sprintf("job not foundsdf for jobID %s", jobID.String()), "")
+		}
+		// Return the actual error if it's not a "not found" error
+		return nil, err
+	}
+	return job, err
 }

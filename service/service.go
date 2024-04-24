@@ -24,8 +24,9 @@ type IService interface {
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
 	DeleteProject(ctx echo.Context) (*output.MessageRes, error)
 	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error)
-	GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error)
+	GetManyJobs(ctx echo.Context) ([]output.GetManyJobRes, error)
 	PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error)
+	GetJob(ctx echo.Context) (*output.GetJobRes, error)
 }
 
 func (s *Service) GetProject(ctx echo.Context) (*output.GetProjectRes, error) {
@@ -81,7 +82,7 @@ func (s *Service) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (
 	return res, nil
 }
 
-func (s *Service) GetManyJobs(ctx echo.Context) ([]output.GetJobResAll, error) {
+func (s *Service) GetManyJobs(ctx echo.Context) ([]output.GetManyJobRes, error) {
 	res, err := s.storage.GetManyJobs(ctx)
 	if err != nil {
 		return nil, err
@@ -94,5 +95,18 @@ func (s *Service) PostJob(ctx echo.Context, req *input.PostJobReq) (*output.Mess
 	if err != nil {
 		return nil, err
 	}
+	return res, nil
+}
+
+func (s *Service) GetJob(ctx echo.Context) (*output.GetJobRes, error) {
+	jobID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.storage.GetJob(ctx, jobID)
+	if err != nil {
+		return nil, err
+	}
+
 	return res, nil
 }

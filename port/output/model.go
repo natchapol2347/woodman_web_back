@@ -37,14 +37,16 @@ type ContactFormRes struct {
 }
 
 type GetJobRes struct {
-	JobID          uuid.UUID `json:"jobID"`
-	Title          string    `json:"title"`
-	Status         string    `json:"status"`
-	Salary         string    `json:"salary"`
-	EmploymentType string    `json:"employmentType"`
+	Title          string `json:"title"`
+	Description    string `json:"description"`
+	Requirements   string `json:"requirements"`
+	Location       string `json:"location"`
+	DatePosted     string `json:"datePosted"`
+	Status         string `json:"status"`
+	Salary         string `json:"salary"`
+	EmploymentType string `json:"employmentType"`
 }
-
-type GetJobResAll struct {
+type GetManyJobRes struct {
 	JobID          uuid.UUID `json:"jobID"`
 	Title          string    `json:"title"`
 	Description    string    `json:"description"`
