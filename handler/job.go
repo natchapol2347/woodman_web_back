@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/natchapol2347/woodman_web_back/port/input"
 	"github.com/natchapol2347/woodman_web_back/port/output"
@@ -21,8 +22,12 @@ func NewJobHandler(service service.IService) *JobHandler {
 }
 
 func (h *JobHandler) GetJob(ctx echo.Context) error {
+	jobID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return err
+	}
 
-	res, err := h.service.GetJob(ctx)
+	res, err := h.service.GetJob(ctx, jobID)
 	if err != nil {
 		if customErr, ok := err.(*output.ErrorResponse); ok {
 			return ctx.JSON(customErr.StatusCode, customErr)
@@ -53,6 +58,23 @@ func (h *JobHandler) PostJob(ctx echo.Context) error {
 		return err
 	}
 	res, err := h.service.PostJob(ctx, req)
+	if err != nil {
+		if customErr, ok := err.(*output.ErrorResponse); ok {
+			return ctx.JSON(customErr.StatusCode, customErr)
+		}
+		return ctx.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+
+}
+
+func (h *JobHandler) DeleteJob(ctx echo.Context) error {
+	jobID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return err
+	}
+	res, err := h.service.DeleteJob(ctx, jobID)
 	if err != nil {
 		if customErr, ok := err.(*output.ErrorResponse); ok {
 			return ctx.JSON(customErr.StatusCode, customErr)

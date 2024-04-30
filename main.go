@@ -31,7 +31,7 @@ func main() {
 	e.GET("/jobs", handlerJob.GetManyJobs)
 	e.GET("/job/:id", handlerJob.GetJob)
 	e.POST("/job", handlerJob.PostJob)
-
+	e.DELETE("/remove-job/:id", handlerJob.DeleteJob)
 	e.Logger.Fatal(e.Start("127.0.0.1:1323"))
 
 }

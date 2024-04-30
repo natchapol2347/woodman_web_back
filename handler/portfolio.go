@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/natchapol2347/woodman_web_back/port/input"
 	"github.com/natchapol2347/woodman_web_back/port/output"
@@ -20,8 +21,11 @@ func NewPortfolioHandler(service service.IService) *PortfolioHandler {
 
 }
 func (h *PortfolioHandler) GetProject(ctx echo.Context) error {
-
-	res, err := h.service.GetProject(ctx)
+	projectID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return err
+	}
+	res, err := h.service.GetProject(ctx, projectID)
 	if err != nil {
 		if customErr, ok := err.(*output.ErrorResponse); ok {
 			return ctx.JSON(customErr.StatusCode, customErr)
@@ -65,8 +69,11 @@ func (h *PortfolioHandler) PostProject(ctx echo.Context) error {
 }
 
 func (h *PortfolioHandler) DeleteProject(ctx echo.Context) error {
-
-	res, err := h.service.DeleteProject(ctx)
+	projectID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return err
+	}
+	res, err := h.service.DeleteProject(ctx, projectID)
 
 	if err != nil {
 		if customErr, ok := err.(*output.ErrorResponse); ok {
@@ -80,11 +87,13 @@ func (h *PortfolioHandler) DeleteProject(ctx echo.Context) error {
 }
 
 func (h *PortfolioHandler) UpdateProject(ctx echo.Context) error {
+	projectID := ctx.Param("id")
+
 	req := &input.UpdateProjectReq{}
 	if err := ctx.Bind(&req); err != nil {
 		return err
 	}
-	res, err := h.service.UpdateProject(ctx, req)
+	res, err := h.service.UpdateProject(ctx, req, projectID)
 	if err != nil {
 		if customErr, ok := err.(*output.ErrorResponse); ok {
 			return ctx.JSON(customErr.StatusCode, customErr)

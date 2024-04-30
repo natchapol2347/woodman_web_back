@@ -28,10 +28,11 @@ type IStorage interface {
 	GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, error)
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
 	DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.MessageRes, error)
-	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error)
+	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq, projectID string) (*output.MessageRes, error)
 	GetManyJobs(ctx echo.Context) ([]output.GetManyJobRes, error)
 	PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error)
 	GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, error)
+	DeleteJob(ctx echo.Context, jobID uuid.UUID) (*output.MessageRes, error)
 }
 
 func (s *Storage) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error) {
@@ -196,9 +197,8 @@ func (s *Storage) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 
 }
 
-func (s *Storage) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error) {
+func (s *Storage) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq, projectID string) (*output.MessageRes, error) {
 	queryCtx := ctx.Request().Context()
-	var projectID string = ctx.Param("id")
 	uuidProjID, err := uuid.Parse(projectID)
 	if err != nil {
 		return nil, err
@@ -364,4 +364,23 @@ func (s *Storage) GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, 
 		return nil, err
 	}
 	return job, err
+}
+
+func (s *Storage) DeleteJob(ctx echo.Context, jobID uuid.UUID) (*output.MessageRes, error) {
+	queryCtx := ctx.Request().Context()
+	_, err := s.db.ExecContext(queryCtx, "DELETE FROM job WHERE JobID = $1", jobID)
+	if err != nil {
+		// Handle error
+		return nil, err
+	}
+
+	msg := "Delete project successfully"
+	data := fmt.Sprintf("Job ID: %s", jobID.String())
+
+	response := &output.MessageRes{
+		Message: msg,
+		Data:    data,
+	}
+	return response, nil
+
 }

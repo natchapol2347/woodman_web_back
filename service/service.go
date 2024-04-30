@@ -19,21 +19,19 @@ func NewService(storage storage.IStorage) *Service {
 }
 
 type IService interface {
-	GetProject(ctx echo.Context) (*output.GetProjectRes, error)
+	GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error)
 	GetManyProjects(ctx echo.Context) ([]output.GetProjectRes, error)
 	PostProject(ctx echo.Context, req *input.PostProjectReq) (*output.MessageRes, error)
-	DeleteProject(ctx echo.Context) (*output.MessageRes, error)
-	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error)
+	DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.MessageRes, error)
+	UpdateProject(ctx echo.Context, req *input.UpdateProjectReq, projectID string) (*output.MessageRes, error)
 	GetManyJobs(ctx echo.Context) ([]output.GetManyJobRes, error)
 	PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error)
-	GetJob(ctx echo.Context) (*output.GetJobRes, error)
+	GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, error)
+	DeleteJob(ctx echo.Context, jobID uuid.UUID) (*output.MessageRes, error)
 }
 
-func (s *Service) GetProject(ctx echo.Context) (*output.GetProjectRes, error) {
-	projectID, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		return nil, err
-	}
+func (s *Service) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error) {
+
 	res, err := s.storage.GetProject(ctx, projectID)
 	if err != nil {
 		return nil, err
@@ -62,11 +60,8 @@ func (s *Service) PostProject(ctx echo.Context, req *input.PostProjectReq) (*out
 
 }
 
-func (s *Service) DeleteProject(ctx echo.Context) (*output.MessageRes, error) {
-	projectID, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		return nil, err
-	}
+func (s *Service) DeleteProject(ctx echo.Context, projectID uuid.UUID) (*output.MessageRes, error) {
+
 	res, err := s.storage.DeleteProject(ctx, projectID)
 	if err != nil {
 		return nil, err
@@ -74,8 +69,8 @@ func (s *Service) DeleteProject(ctx echo.Context) (*output.MessageRes, error) {
 	return res, nil
 }
 
-func (s *Service) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq) (*output.MessageRes, error) {
-	res, err := s.storage.UpdateProject(ctx, req)
+func (s *Service) UpdateProject(ctx echo.Context, req *input.UpdateProjectReq, projectID string) (*output.MessageRes, error) {
+	res, err := s.storage.UpdateProject(ctx, req, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -98,15 +93,21 @@ func (s *Service) PostJob(ctx echo.Context, req *input.PostJobReq) (*output.Mess
 	return res, nil
 }
 
-func (s *Service) GetJob(ctx echo.Context) (*output.GetJobRes, error) {
-	jobID, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		return nil, err
-	}
+func (s *Service) GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, error) {
+
 	res, err := s.storage.GetJob(ctx, jobID)
 	if err != nil {
 		return nil, err
 	}
 
+	return res, nil
+}
+
+func (s *Service) DeleteJob(ctx echo.Context, jobID uuid.UUID) (*output.MessageRes, error) {
+
+	res, err := s.storage.DeleteJob(ctx, jobID)
+	if err != nil {
+		return nil, err
+	}
 	return res, nil
 }
