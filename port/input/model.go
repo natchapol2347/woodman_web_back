@@ -20,6 +20,16 @@ type PostProjectReq struct {
 	Images         []ProjectImagesReq `json:"images"`
 }
 
+type UpdateProjectReq struct {
+	ProjectName    string             `json:"projectName" validate:"required"`
+	Description    string             `json:"description,omitempty"`
+	CompletionDate string             `json:"completionDate" validate:"required"`
+	CategoryID     uuid.UUID          `json:"categoryID,omitempty"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
+	TagID          uuid.UUID          `json:"TagID,omitempty"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
+	DeleteImages   []ProjectImagesReq `json:"deleteImages"`
+	InsertImages   []ProjectImagesReq `json:"insertImages"`
+}
+
 type ContactFormReq struct {
 	// SubmissionID uuid.UUID `json:"submissionID"`
 	Name      string    `json:"name"`
@@ -39,12 +49,13 @@ type PostJobReq struct {
 	EmploymentType string `json:"employmentType"`
 }
 
-type UpdateProjectReq struct {
-	ProjectName    string             `json:"projectName" validate:"required"`
-	Description    string             `json:"description,omitempty"`
-	CompletionDate string             `json:"completionDate" validate:"required"`
-	CategoryID     uuid.UUID          `json:"categoryID,omitempty"` //     FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
-	TagID          uuid.UUID          `json:"TagID,omitempty"`      //     FOREIGN KEY (TagID) REFERENCES Tag(TagID)
-	DeleteImages   []ProjectImagesReq `json:"deleteImages"`
-	InsertImages   []ProjectImagesReq `json:"insertImages"`
+type UpdateJobReq struct {
+	Title          string `json:"title"`
+	Description    string `json:"description"`
+	Requirements   string `json:"requirements"`
+	Location       string `json:"location"`
+	DatePosted     string `json:"dateposted"`
+	Status         string `json:"status"`
+	Salary         string `json:"salary"`
+	EmploymentType string `json:"employmentType"`
 }

@@ -85,3 +85,21 @@ func (h *JobHandler) DeleteJob(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 
 }
+
+func (h *JobHandler) UpdateJob(ctx echo.Context) error {
+	jobID := ctx.Param("id")
+
+	req := &input.UpdateJobReq{}
+	if err := ctx.Bind(&req); err != nil {
+		return err
+	}
+	res, err := h.service.UpdateJob(ctx, req, jobID)
+	if err != nil {
+		if customErr, ok := err.(*output.ErrorResponse); ok {
+			return ctx.JSON(customErr.StatusCode, customErr)
+		}
+		return ctx.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}

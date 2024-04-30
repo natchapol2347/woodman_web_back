@@ -28,6 +28,7 @@ type IService interface {
 	PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error)
 	GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, error)
 	DeleteJob(ctx echo.Context, jobID uuid.UUID) (*output.MessageRes, error)
+	UpdateJob(ctx echo.Context, req *input.UpdateJobReq, jobID string) (*output.MessageRes, error)
 }
 
 func (s *Service) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error) {
@@ -106,6 +107,14 @@ func (s *Service) GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, 
 func (s *Service) DeleteJob(ctx echo.Context, jobID uuid.UUID) (*output.MessageRes, error) {
 
 	res, err := s.storage.DeleteJob(ctx, jobID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (s *Service) UpdateJob(ctx echo.Context, req *input.UpdateJobReq, jobID string) (*output.MessageRes, error) {
+	res, err := s.storage.UpdateJob(ctx, req, jobID)
 	if err != nil {
 		return nil, err
 	}

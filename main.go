@@ -32,6 +32,7 @@ func main() {
 	e.GET("/job/:id", handlerJob.GetJob)
 	e.POST("/job", handlerJob.PostJob)
 	e.DELETE("/remove-job/:id", handlerJob.DeleteJob)
+	e.PUT("/update-project/:id", handlerJob.UpdateJob)
 	e.Logger.Fatal(e.Start("127.0.0.1:1323"))
 
 }

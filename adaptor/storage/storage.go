@@ -33,6 +33,7 @@ type IStorage interface {
 	PostJob(ctx echo.Context, req *input.PostJobReq) (*output.MessageRes, error)
 	GetJob(ctx echo.Context, jobID uuid.UUID) (*output.GetJobRes, error)
 	DeleteJob(ctx echo.Context, jobID uuid.UUID) (*output.MessageRes, error)
+	UpdateJob(ctx echo.Context, req *input.UpdateJobReq, jobID string) (*output.MessageRes, error)
 }
 
 func (s *Storage) GetProject(ctx echo.Context, projectID uuid.UUID) (*output.GetProjectRes, error) {
@@ -383,4 +384,81 @@ func (s *Storage) DeleteJob(ctx echo.Context, jobID uuid.UUID) (*output.MessageR
 	}
 	return response, nil
 
+}
+
+func (s *Storage) UpdateJob(ctx echo.Context, req *input.UpdateJobReq, jobID string) (*output.MessageRes, error) {
+	queryCtx := ctx.Request().Context()
+	uuidJobID, err := uuid.Parse(jobID)
+	if err != nil {
+		return nil, err
+	}
+	// Construct the UPDATE query
+	query := "UPDATE job SET "
+	params := []interface{}{}
+
+	var index int = 1
+	if req.Title != "" && req.Description != "" && req.Requirements != "" && req.Location != "" && req.DatePosted != "" && req.Status != "" && req.Salary != "" && req.EmploymentType != "" {
+		if req.Title != "" {
+			query += "Title = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.Title)
+			index++
+		}
+		if req.Description != "" {
+			query += "Description = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.Description)
+			index++
+		}
+		if req.Requirements != "" {
+			query += "Requirements = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.Requirements)
+			index++
+		}
+		if req.Location != "" {
+			query += "Location = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.Location)
+			index++
+		}
+		if req.DatePosted != "" {
+			query += "Dateposted = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.DatePosted)
+			index++
+		}
+		if req.Status != "" {
+			query += "Status = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.Status)
+			index++
+		}
+		if req.Salary != "" {
+			query += "Salary = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.Salary)
+			index++
+		}
+		if req.EmploymentType != "" {
+			query += "Employmenttype = $" + strconv.Itoa(index) + ", "
+			params = append(params, req.EmploymentType)
+			index++
+		}
+
+		// Remove the trailing comma and space
+		query = query[:len(query)-2]
+
+		// Add the WHERE clause
+		query += " WHERE JobID = $" + strconv.Itoa(index)
+		params = append(params, uuidJobID)
+
+		// Execute the UPDATE query
+		_, err := s.db.ExecContext(queryCtx, query, params...)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	msg := fmt.Sprintf("Update to job (ID: %s) successfully", jobID)
+
+	response := &output.MessageRes{
+		Message: msg,
+		Data:    "",
+	}
+	return response, nil
 }
